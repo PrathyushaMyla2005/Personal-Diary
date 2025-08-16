@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Diary - Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Roboto', sans-serif; }
+    body {
+      display:flex;
+      min-height:100vh;
+      background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width:220px;
+      background: rgba(0,0,0,0.8);
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      padding:20px;
+      position: fixed;
+      left:-220px;
+      top:0;
+      height:100%;
+      transition: left 0.3s ease;
+      z-index:200;
+    }
+    .sidebar.show { left:0; }
+    .sidebar h2 { text-align:center; margin-bottom:30px; font-size:1.5rem; }
+    .sidebar a { text-decoration:none; color:#fff; padding:10px; margin:5px 0; border-radius:8px; transition: background 0.3s; display:flex; align-items:center; gap:10px; }
+    .sidebar a:hover { background: rgba(255,255,255,0.2); }
+
+    /* Overlay */
+    .overlay { position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:none; z-index:100; }
+
+    /* Main Content */
+    .main-content { flex:1; margin-left:0; padding:30px; overflow-y:auto; background: rgba(255,255,255,0.9); transition: margin-left 0.3s ease; }
+
+    /* Header */
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+    .header h1 { font-size:2rem; color:#333; }
+    .header button { padding:8px 16px; border:none; background:#333; color:#fff; border-radius:6px; cursor:pointer; }
+    .header button:hover { background:#555; }
+    .toggle-btn { display:block; font-size:1.5rem; background:none; border:none; cursor:pointer; margin-right:15px; z-index:300; position:relative; }
+
+    /* Profile Form */
+    .profile-container {
+      max-width:600px;
+      margin:0 auto;
+      background:#fff;
+      padding:20px;
+      border-radius:10px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      text-align:center;
+    }
+    .profile-container h2 { margin-bottom:20px; color:#333; text-align:center; }
+
+    /* Round Profile Pic with Edit Icon */
+    .profile-pic {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background-color: #6b7c85;
+      margin: 0 auto 15px auto;
+      overflow: visible;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .profile-pic img {
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      border-radius:50%;
+      z-index:1;
+      position: relative;
+    }
+    .edit-icon {
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      width:40px; height:40px;
+      border-radius:50%;
+      background:#00cc66;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      cursor:pointer;
+      border:2px solid #fff;
+      z-index:10;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .edit-icon img { width:20px; height:20px; }
+    .edit-icon:hover { transform: scale(1.2) rotate(15deg); background:#00ff88; }
+
+    /* Form fields */
+    .profile-container label { display:block; margin-bottom:5px; font-weight:500; text-align:left; }
+    .profile-container input {
+      width:100%;
+      padding:10px;
+      margin-bottom:15px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-size:1rem;
+    }
+    .profile-container button { padding:10px 20px; border:none; background:#333; color:#fff; border-radius:6px; cursor:pointer; }
+    .profile-container button:hover { background:#555; }
+    input[type="file"] { display: none; }
+
+    @media(max-width:768px){
+      .main-content { padding:15px; }
+      .header h1 { font-size:1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>My Diary</h2>
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="diary.html?mode=write">✏️ Write Entry</a>
+    <a href="diary.html?mode=view">📖 View Entries</a>
+    <a href="calendar.html">📅 Calendar</a>
+    <a href="#">😊 Mood Tracking</a>
+    <a href="profile.html">👤 Profile</a>
+     <a href="#">💾 Export / Backup</a>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="header">
+      <button class="toggle-btn" id="toggle-btn">☰</button>
+      <h1>User Profile</h1>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="profile-container">
+      
+      <!-- Profile Picture -->
+      <div class="profile-pic" id="profilePic">
+        
+        <div class="edit-icon" id="editIcon">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/pencil--v1.png" alt="Edit">
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*">
+
+      <!-- Form Fields -->
+      <label for="name">Full Name</label>
+      <input type="text" id="name" placeholder="Enter your name" value="John Doe">
+
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter your email" value="john@example.com">
+
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" value="john123">
+
+      <label for="password">Change Password</label>
+      <input type="password" id="password" placeholder="Enter new password">
+
+      <button id="save-profile">Save Changes</button>
+    </div>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const toggleBtn = document.getElementById('toggle-btn');
+
+    // Toggle sidebar
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+      overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+    });
+
+    // Click overlay to close sidebar
+    overlay.addEventListener('click', () => {
+      sidebar.classList.remove('show');
+      overlay.style.display = 'none';
+    });
+
+    // Close sidebar when link clicked
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.addEventListener('click', () => {
+        sidebar.classList.remove('show');
+        overlay.style.display = 'none';
+      });
+    });
+
+    function logout() {
+      alert("Logging out...");
+      window.location.href = 'login.html';
+    }
+
+    // Save profile placeholder
+    document.getElementById('save-profile').addEventListener('click', () => {
+      alert("Profile changes saved successfully!");
+    });
+
+    // Profile picture change
+    const fileInput = document.getElementById('fileInput');
+    const profileImage = document.getElementById('profileImage');
+    const editIcon = document.getElementById('editIcon');
+
+    editIcon.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          profileImage.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+
+</body>
+</html>

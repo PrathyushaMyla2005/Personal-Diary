@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Diary - Diary</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing: border-box; font-family:'Roboto',sans-serif; }
+
+  body {
+    background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed;
+    left: -220px;
+    top: 0;
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 200;
+  }
+  .sidebar.show { left: 0; }
+  .sidebar h2 { margin-bottom: 30px; text-align:center; font-size:1.5rem; color:#fff; }
+  .sidebar a {
+    text-decoration: none;
+    color: #fff;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  .sidebar a:hover { background: rgba(255,255,255,0.2); }
+
+  /* Overlay for mobile */
+  .overlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.6);
+    display:none;
+    z-index: 100;
+  }
+
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    margin-left: 0;
+    padding: 30px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.9);
+    transition: margin-left 0.3s ease;
+  }
+  .main-content.shift { margin-left: 220px; }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  .header h1 { font-size:2rem; color:#333; }
+  .header button { padding: 8px 16px; border:none; background:#333; color:#fff; border-radius:6px; cursor:pointer; }
+  .header button:hover { background:#555; }
+
+  /* Toggle Button */
+  .toggle-btn { 
+    display: block;
+    font-size:1.5rem; 
+    background:none; 
+    border:none; 
+    cursor:pointer; 
+    margin-right:15px; 
+  }
+
+  /* Add Entry */
+  .add-entry {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom:30px;
+  }
+  .add-entry h2 { margin-bottom:15px; color:#333; }
+  .add-entry input, .add-entry textarea, .add-entry select {
+    width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ccc; font-size:1rem;
+  }
+  .add-entry textarea { resize: vertical; min-height:100px; }
+  .add-entry button { padding:10px 20px; border:none; background:#333; color:#fff; border-radius:6px; cursor:pointer; }
+  .add-entry button:hover { background:#555; }
+
+  /* View Entries */
+  .entries { display:flex; flex-direction:column; gap:20px; }
+  .entry-card { background:#f8f8f8; padding:15px 20px; border-radius:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1); position:relative; }
+  .entry-card h3 { margin-bottom:5px; color:#333; }
+  .entry-card .meta { font-size:0.9rem; color:#666; margin-bottom:10px; }
+  .entry-card p { color:#444; }
+  .entry-card .actions { position:absolute; top:15px; right:20px; display:flex; gap:10px; }
+  .entry-card .actions button { border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.8rem; }
+  .entry-card .actions button.edit { background:#4caf50; color:#fff; }
+  .entry-card .actions button.delete { background:#f44336; color:#fff; }
+  .entry-card .actions button:hover { opacity:0.9; }
+
+  /* Responsive */
+  @media(max-width:768px){
+    .main-content.shift { margin-left: 0; }
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>My Diary</h2>
+      <a href="index.html">🏠 Home</a>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="diary.html?mode=write">✏️ Write Entry</a>
+      <a href="diary.html?mode=view">📖 View Entries</a>
+      <a href="calendar.html">📅 Calendar</a>
+      <a href="#">😊 Mood Tracking</a>
+      <a href="profile.html">👤 Profile</a>
+       <a href="#">💾 Export / Backup</a>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+    <div class="header">
+      <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+      <h1>Write Your Diary</h1>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Add Entry -->
+    <div class="add-entry">
+      <h2>New Entry</h2>
+      <input type="text" placeholder="Title" id="entry-title">
+      <input type="date" id="entry-date">
+      <select id="entry-mood">
+        <option value="">Select Mood</option>
+        <option value="😊">😊 Happy</option>
+        <option value="😌">😌 Relaxed</option>
+        <option value="😎">😎 Cool</option>
+        <option value="😢">😢 Sad</option>
+        <option value="😡">😡 Angry</option>
+      </select>
+      <textarea placeholder="Write your thoughts..." id="entry-content"></textarea>
+      <button id="save-entry">Save Entry</button>
+    </div>
+
+    <!-- View Entries -->
+    <div class="entries" id="view-entries">
+      <h2>Recent Entries</h2>
+      <div class="entry-card">
+        <h3>My First Day at College</h3>
+        <div class="meta">2025-08-16 | 😊</div>
+        <p>Today was amazing! I met so many new friends and learned a lot...</p>
+        <div class="actions">
+          <button class="edit">Edit</button>
+          <button class="delete">Delete</button>
+        </div>
+      </div>
+      <div class="entry-card">
+        <h3>Evening Walk</h3>
+        <div class="meta">2025-08-15 | 😌</div>
+        <p>Had a relaxing evening walk in the park. Feeling calm and refreshed...</p>
+        <div class="actions">
+          <button class="edit">Edit</button>
+          <button class="delete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dateInput = document.getElementById('entry-date');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
+
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('show');
+      mainContent.classList.toggle('shift');
+      if(window.innerWidth <= 768){
+        overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+      }
+    }
+
+    function logout() {
+      alert("Logging out...");
+      window.location.href = 'login.html';
+    }
+
+    document.getElementById('save-entry').addEventListener('click', () => {
+      alert("Save entry functionality will be added.");
+    });
+  </script>
+
+</body>
+</html>
