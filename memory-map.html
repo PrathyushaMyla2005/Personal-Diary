@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Map - Personal Diary</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0; padding: 0;
+  background-color: #f5f5f5;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #4a90e2;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  position: fixed; top: 0; left: 0;
+  transform: translateX(-220px); /* hidden by default */
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+.sidebar.active { transform: translateX(0); }
+
+.sidebar h2 { text-align: center; margin-bottom: 20px; }
+.sidebar a {
+  display: block; color: white; text-decoration: none;
+  padding: 10px 0; margin: 5px 0; border-radius: 5px;
+  transition: 0.2s;
+}
+.sidebar a:hover { background-color: rgba(255,255,255,0.2); }
+
+/* Overlay */
+.overlay {
+  position: fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.4);
+  opacity: 0; visibility: hidden;
+  transition: 0.3s;
+  z-index: 900;
+}
+.overlay.active { opacity:1; visibility: visible; }
+
+/* Main content */
+.main-content { transition: margin-left 0.3s; margin-left:0; }
+.main-content.shift { margin-left:220px; }
+
+header {
+  display:flex; justify-content: space-between; align-items:center;
+  background-color:#4a90e2; color:white;
+  padding:20px; border-radius:0 0 10px 10px;
+}
+
+.toggle-btn {
+  font-size:24px; background:none; border:none;
+  color:white; cursor:pointer;
+}
+
+#map {
+  height:80vh; width:95%; margin:20px auto;
+  border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <h2>My Diary</h2>
+  <a href="index.html">🏠 Home</a>
+  <a href="dashboard.html">📊 Dashboard</a>
+  <a href="diary.html?mode=write">✏️ Write Entry</a>
+  <a href="diary.html?mode=view">📖 View Entries</a>
+  <a href="calendar.html">📅 Calendar</a>
+  <a href="#">😊 Mood Tracking</a>
+  <a href="profile.html">👤 Profile</a>
+   <a href="#">💾 Export / Backup</a>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Main content -->
+<div class="main-content" id="main-content">
+  <header>
+    <button class="toggle-btn" id="toggle-btn">☰</button>
+    <h1>My Memory Map</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// Initialize map
+var map = L.map('map').setView([20.5937,78.9629],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom:19 }).addTo(map);
+
+var diaryEntries = [
+  {title:"Beach Day", content:"Had fun at the beach!", mood:"Happy", date:"2025-08-10", lat:12.9716, lng:77.5946},
+  {title:"Mountain Trek", content:"Reached the peak!", mood:"Excited", date:"2025-07-25", lat:30.3165, lng:78.0322},
+  {title:"Coffee with Friend", content:"Enjoyed coffee.", mood:"Relaxed", date:"2025-08-01", lat:19.0760, lng:72.8777}
+];
+
+diaryEntries.forEach(entry=>{
+  var marker = L.marker([entry.lat, entry.lng]).addTo(map);
+  marker.bindPopup(`<b>${entry.title}</b><br><i>${entry.date}</i><br>Mood: ${entry.mood}<br><p>${entry.content}</p>`);
+});
+
+// Sidebar toggle logic
+const toggleBtn = document.getElementById('toggle-btn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const mainContent = document.getElementById('main-content');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('active');
+  overlay.classList.toggle('active');
+  mainContent.classList.toggle('shift');
+  map.invalidateSize(); // fixes Leaflet map size
+}
+
+// Click ☰ button toggles sidebar
+toggleBtn.addEventListener('click', toggleSidebar);
+
+// Click overlay closes sidebar
+overlay.addEventListener('click', toggleSidebar);
+
+// Optional: close sidebar on mobile when clicking a link
+sidebar.querySelectorAll('a').forEach(link=>{
+  link.addEventListener('click', ()=>{
+    if(window.innerWidth < 768){
+      toggleSidebar();
+    }
+  });
+});
+
+function logout(){ alert("Logged out!"); window.location.href='login.html'; }
+</script>
+</body>
+</html>

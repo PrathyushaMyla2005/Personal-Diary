@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Use HTML entity for emoji in title for browser compatibility -->
+  <title>&#128214; Personal Diary - Home</title>
+
+  <!-- Internal CSS -->
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Body & Background */
+    body {
+      background: url('images/diary.jpg') no-repeat center center/cover;
+      color: black; /* Black text on top of background */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 50px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(6px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #222;
+    }
+
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+      padding: 8px 14px;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: white;
+      background-color: #2563eb;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .hero h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: black;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.7);
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: black;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <h1 class="logo">📖 Personal Diary</h1>
+    <nav>
+      <a href="#">About</a>
+      <a href="login.html" class="btn">Login</a>
+      <a href="signup.html" class="btn signup-btn">Signup</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h2>Welcome to Your Personal Diary</h2>
+    <p>A safe space to write your thoughts, moods, and memories ✨</p>
+  </section>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export / Backup Diary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Roboto', sans-serif; }
+    body { background:#f5f5f5; color:#333; }
+
+    /* Sidebar */
+    .sidebar { position: fixed; top:0; left:-250px; width:250px; height:100%; background:#37474f; color:#fff; padding:20px; transition:0.3s; z-index:1000; overflow-y:auto; }
+    .sidebar h2 { margin-bottom:20px; font-size:24px; }
+    .sidebar a { display:block; color:#fff; text-decoration:none; margin:10px 0; padding:10px; border-radius:5px; transition:0.2s; }
+    .sidebar a:hover { background:#546e7a; }
+
+    /* Overlay */
+    .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:none; z-index:500; }
+
+    /* Main content */
+    .main-content { transition: margin-left 0.3s; padding:20px; max-width:900px; margin:0 auto; }
+
+    header { display:flex; align-items:center; margin-bottom:20px; }
+    .toggle-btn { font-size:24px; background:none; border:none; cursor:pointer; margin-right:10px; color:#1976d2; }
+
+    h1 { text-align:center; margin-bottom:20px; }
+    .container { max-width:800px; margin:0 auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); text-align:center; }
+    button { padding:10px 15px; margin:10px 5px 20px 0; font-size:16px; cursor:pointer; border:none; border-radius:5px; background:#1976d2; color:#fff; transition:0.2s; }
+    button:hover { background:#1565c0; }
+    #status { margin-top:10px; font-weight:500; }
+    ul { list-style:none; margin-top:10px; padding-left:0; text-align:left; }
+    li { padding:8px 0; border-bottom:1px solid #ddd; }
+    input, select { padding:5px; margin:0 10px 10px 0; font-size:16px; border-radius:5px; border:1px solid #ccc; }
+    label { font-weight:500; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h2>My Diary</h2>
+    <a href="index.html">🏠 Home</a>
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="diary.html?mode=write">✏️ Write Entry</a>
+    <a href="diary.html?mode=view">📖 View Entries</a>
+    <a href="calendar.html">📅 Calendar</a>
+    <a href="#">😊 Mood Tracking</a>
+    <a href="profile.html">👤 Profile</a>
+     <a href="#">💾 Export / Backup</a>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main content -->
+  <div class="main-content" id="main-content">
+    <header>
+      <button class="toggle-btn" id="toggle-btn">☰</button>
+      <h1>Export / Backup Diary</h1>
+    </header>
+
+    <div class="container">
+      <!-- Select Filters -->
+      <label for="exportDate">Select Date:</label>
+      <input type="date" id="exportDate">
+
+      <label for="exportMonth">Select Month:</label>
+      <input type="month" id="exportMonth">
+
+      <label for="exportYear">Select Year:</label>
+      <select id="exportYear">
+        <option value="">--Select Year--</option>
+      </select>
+      <br>
+
+      <!-- Single Export / Backup Buttons -->
+      <button id="exportBtn">📄 Export PDF</button>
+      <button id="backupBtn">☁️ Backup JSON</button>
+
+      <div id="status"></div>
+      <h2>Diary Entries</h2>
+      <ul id="entryList"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const toggleBtn = document.getElementById("toggle-btn");
+    let sidebarOpen = false;
+    toggleBtn.addEventListener("click", () => {
+      sidebar.style.left = sidebarOpen ? "-250px" : "0";
+      overlay.style.display = sidebarOpen ? "none" : "block";
+      sidebarOpen = !sidebarOpen;
+    });
+    overlay.addEventListener("click", () => {
+      sidebar.style.left = "-250px"; overlay.style.display = "none"; sidebarOpen = false;
+    });
+
+    // Sample diary entries
+    const entries = [
+      { date: "2025-08-10", mood: "happy", text: "Had a great day with friends!" },
+      { date: "2025-08-11", mood: "sad", text: "Felt a bit down today." },
+      { date: "2025-08-12", mood: "neutral", text: "Normal day, nothing special." },
+      { date: "2025-08-13", mood: "happy", text: "Completed my project successfully!" },
+      { date: "2025-08-14", mood: "sad", text: "Missed my workout, feeling low." },
+    ];
+
+    // Display entries
+    const entryList = document.getElementById("entryList");
+    function renderEntries() {
+      entryList.innerHTML = "";
+      entries.forEach(e => {
+        const li = document.createElement("li");
+        li.textContent = `${e.date} - ${e.mood.toUpperCase()} : ${e.text}`;
+        entryList.appendChild(li);
+      });
+    }
+    renderEntries();
+
+    const status = document.getElementById("status");
+
+    // Helper functions
+    function getYesterdayDate() {
+      const today = new Date(); today.setDate(today.getDate()-1);
+      const yyyy = today.getFullYear(), mm = String(today.getMonth()+1).padStart(2,'0'), dd=String(today.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function filterByDate(d){ return entries.filter(e=>e.date===d); }
+    
+    function exportPDF(filtered,title,filename){
+      if(filtered.length===0){ status.textContent="⚠️ No entries found!"; return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(18); doc.text(title,14,20); doc.setFontSize(12);
+      let y=30;
+      filtered.forEach(e=>{ const line=`${e.date} - ${e.mood.toUpperCase()} : ${e.text}`; doc.text(line,14,y); y+=10; if(y>280){ doc.addPage(); y=20; } });
+      doc.save(filename); status.textContent="✅ PDF Exported!";
+    }
+    function exportJSON(filtered,filename){
+      if(filtered.length===0){ status.textContent="⚠️ No entries found!"; return; }
+      const blob=new Blob([JSON.stringify(filtered,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      status.textContent="☁️ JSON Backup Complete!";
+    }
+
+    // Populate Year select
+    const yearSelect = document.getElementById("exportYear");
+    const currentYear = new Date().getFullYear();
+    for(let y=2000; y<=currentYear+5; y++){ const option=document.createElement("option"); option.value=y; option.textContent=y; yearSelect.appendChild(option); }
+
+    // Single button events
+    document.getElementById("exportBtn").addEventListener("click", ()=>{
+      let filtered,title,filename;
+      const date=document.getElementById("exportDate").value;
+      const month=document.getElementById("exportMonth").value;
+      const year=yearSelect.value;
+
+      if(date){ filtered=filterByDate(date); title=`Diary Entries for ${date}`; filename=`Diary_${date}.pdf`; }
+      else if(month){ filtered=filterByMonth(month); title=`Diary Entries for ${month}`; filename=`Diary_${month}.pdf`; }
+      else if(year){ filtered=filterByYear(year); title=`Diary Entries for ${year}`; filename=`Diary_${year}.pdf`; }
+      else{ const yesterday=getYesterdayDate(); filtered=filterByDate(yesterday); title="Yesterday's Diary Entries"; filename=`Diary_${yesterday}.pdf`; }
+
+      exportPDF(filtered,title,filename);
+    });
+
+    document.getElementById("backupBtn").addEventListener("click", ()=>{
+      let filtered,filename;
+      const date=document.getElementById("exportDate").value;
+      const month=document.getElementById("exportMonth").value;
+      const year=yearSelect.value;
+
+      if(date){ filtered=filterByDate(date); filename=`Diary_Backup_${date}.json`; }
+      else if(month){ filtered=filterByMonth(month); filename=`Diary_Backup_${month}.json`; }
+      else if(year){ filtered=filterByYear(year); filename=`Diary_Backup_${year}.json`; }
+      else{ const yesterday=getYesterdayDate(); filtered=filterByDate(yesterday); filename=`Diary_Backup_${yesterday}.json`; }
+
+      exportJSON(filtered,filename);
+    });
+  </script>
+
+</body>
+</html>
